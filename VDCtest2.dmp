@@ -1,0 +1,56 @@
+00001  0000             ; 10 SYS7181
+00002  0001             
+00003  0001             *=$1C01
+00004  1C01             
+00005  1C01  0B 1C 0A              BYTE    $0B, $1C, $0A, $00, $9E, $37, $31, $38, $31, $00, $00, $00
+00006  1C0D             
+00007  1C0D             ; START OF VDC TEST ASSEMBLY CODE
+00008  1C0D             ; CODE FILLS SCREEN WITH SCREENCODE 102
+00009  1C0D             
+00010  1C0D             ; HI-BYTE OF THE DESTINATION ADDRESS TO REGISTER 18
+00011  1C0D  A2 12                 LDX #$12                        ; LOAD $12 FOR REGISTER 18 (VDC) RAM ADDRESS HIGH) IN X
+00012  1C0F  A9 00                 LDA #$00                        ; LOAD HIGH BYTE OF START IN A
+00013  1C11  20 2D 1C              JSR REGISTERWRITE               ; CALL REGISTER WRITE SUBROUTINE
+00014  1C14             
+00015  1C14             ; LO-BYTE OF THE DESTINATION ADDRESS TO REGISTER 19
+00016  1C14  E8                    INX                             ; INCREASE X TO $13 FOR REGISTER 19 (VDC RAM ADDRESS LOW)
+00017  1C15  20 2D 1C              JSR REGISTERWRITE               ; CALL REGISTER WRITE SUBROUTINE
+00018  1C18             
+00019  1C18             ; INITIALISE COUNTERS AND SCREENCODE
+00020  1C18             
+00021  1C18  A0 00                 LDY #$00                        ; LOAD 0 AS COUNTER IN Y
+00022  1C1A  A9 08                 LDA #$08                        ; LOAD 8 AS NUMBER OF PAGES TO WRITE IN A
+00023  1C1C  85 FA                 STA $FA                         ; STORE PAGE COUNTER IN ZERO PAGE ADDRESS $FA
+00024  1C1E  A9 66                 LDA #$66                        ; LOADS A WITH SCREENCODE 102
+00025  1C20             
+00026  1C20             ; SCREEN FILL LOOP
+00027  1C20             COPYLOOP
+00028  1C20  A2 1F                 LDX #$1F                        ; LOAD $1F FOR REGISTER 31 (VDC DATA) IN X
+00029  1C22  20 2D 1C              JSR REGISTERWRITE               ; CALL REGISTER WRITE SUBROUTINE
+00030  1C25  C8                    INY                             ; INCREASE Y COUNTER
+00031  1C26  D0 F8                 BNE COPYLOOP                    ; CONTINUE LOOP UNTIL Y>255 SO A PAGE IS FINISHED
+00032  1C28  C6 FA                 DEC $FA                         ; DECREASE PAGE COUNTER
+00033  1C2A  D0 F4                 BNE COPYLOOP                    ; CONTINUE LOOP UNTIL PAGE COUNTER IS ZERO
+00034  1C2C  60                    RTS                             ; RETURN TO BASIC
+00035  1C2D             
+00036  1C2D             ; SUBROUTINE TO WRITE TO VDC REGISTER
+00037  1C2D             REGISTERWRITE 
+00038  1C2D  8E 00 D6              STX $D600                       ; STORE REGISTER NUMBER LOADED IN X IN VDC ADDRESS REGISTER
+00039  1C30             ;WAITUNTILREADY
+00040  1C30             ;        BIT $D600                       ; CHECK STATUS BIT 7 OF VDC ADDRESS REGISTER
+00041  1C30             ;        BPL WAITUNTILREADY              ; CONTINUE TO WAIT IF STATUS IS NOT READY
+00042  1C30  8D 01 D6              STA $D601                       ; WRITE VALUE STORED IN A TO VDC DATA REGISTER
+00043  1C33  60                    RTS                             ; END SUBROUTINE AND RETURN
+00044  1C34             
+
+******* 2 Label(s) *******
+Copyloop = $1C20 
+RegisterWrite = $1C2D 
+
+******* 0 Unused label(s) *******
+
+******* 1 Variable(s) *******
+tgt_c128  = $0001
+******* 1 Unused variables(s) *******
+tgt_c128
+
